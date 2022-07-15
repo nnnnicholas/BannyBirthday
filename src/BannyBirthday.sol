@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.9;
+pragma solidity 0.8.6;
 
-import "rari-capital/solmate/src/tokens/ERC721.sol";
-import "jbx-protocol/contracts-v2/contracts/JBETHERC20ProjectPayer.sol";
+import "solmate/tokens/ERC721.sol";
+import "juice-contracts-v2/JBETHERC20ProjectPayer.sol";
 
 contract BannyBirthday is ERC721 {
     uint256 public totalSupply;
