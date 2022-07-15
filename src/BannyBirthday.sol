@@ -4,10 +4,11 @@ pragma solidity 0.8.6;
 import "solmate/tokens/ERC721.sol";
 import "juice-contracts-v2/JBETHERC20ProjectPayer.sol";
 
-contract BannyBirthday is ERC721 {
+contract BannyBirthday is ERC721, JBETHERC20ProjectPayer {
     uint256 public totalSupply;
-    string metadata;
-    uint256 deadline;
+    string private metadata;
+    uint256 private deadline;
+    uint256 private projectId;
 
     constructor(
         string memory _name,
@@ -15,36 +16,37 @@ contract BannyBirthday is ERC721 {
         uint256 _projectId,
         address _beneficiary,
         string memory _metadata,
-        uint256 memory _deadline // 1657972800 last time it'll be July 15 anywhere in the world
+        uint256 _deadline // 1657972800 last time it'll be July 15 anywhere in the world
     )
         ERC721(_name, _symbol)
         JBETHERC20ProjectPayer(
             _projectId,
             payable(_beneficiary),
             false,
-            "happy birthday Banny!",
+            "happy birthday Banny! https://jbx.mypinata.cloud/ipfs/QmTLnhYt7vMe8Zhui7WZjgiFjZwFWicnS2KLMFUtzJLtgW",
             "",
             false,
             IJBDirectory(0xCc8f7a89d89c2AB3559f484E0C656423E979ac9C),
             address(this)
         )
     {
+        projectId = _projectId;
         metadata = _metadata;
         deadline = _deadline;
     }
 
-    function mint() external {
-        require(msg.value > 0.001, "must donate moar");
+    function mint() external payable {
+        require(msg.value > 0.001 ether, "must donate moar");
         require(block.timestamp < deadline);
         _pay(
-            projectId, //uint256 _projectId,
+            projectId, //uint256 _projectId,`
             JBTokens.ETH, // address _token
             msg.value, //uint256 _amount,
             18, //uint256 _decimals,
             msg.sender, //address _beneficiary,
             0, //uint256 _minReturnedTokens,
             false, //bool _preferClaimedTokens,
-            "happy birthday Banny!", //string calldata _memo, TODO Swap this for IPFS of the bday image
+            "happy birthday Banny! https://jbx.mypinata.cloud/ipfs/QmTLnhYt7vMe8Zhui7WZjgiFjZwFWicnS2KLMFUtzJLtgW", //string calldata _memo, TODO Swap this for IPFS of the bday image
             "" //bytes calldata _metadata
         );
         unchecked {
@@ -53,7 +55,24 @@ contract BannyBirthday is ERC721 {
         _mint(msg.sender, totalSupply);
     }
 
-    function tokenUri(tokenId) public view returns (string) {
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override(ERC721)
+        returns (string memory)
+    {
         return metadata;
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, JBETHERC20ProjectPayer)
+        returns (bool)
+    {
+        return
+            JBETHERC20ProjectPayer.supportsInterface(interfaceId) ||
+            ERC721.supportsInterface(interfaceId);
     }
 }
